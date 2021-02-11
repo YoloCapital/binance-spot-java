@@ -4,7 +4,9 @@ import com.binance.api.client.BinanceApiCallback;
 import com.binance.api.client.BinanceApiWebSocketClient;
 import com.binance.api.client.config.BinanceApiConfig;
 import com.binance.api.client.domain.event.*;
+import com.binance.api.client.domain.general.DepthStreamInterval;
 import com.binance.api.client.domain.market.CandlestickInterval;
+import com.binance.api.client.domain.market.OrderBook;
 import com.fasterxml.jackson.core.type.TypeReference;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -14,11 +16,13 @@ import java.io.Closeable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Binance API WebSocket client implementation using OkHttp.
  */
 public class BinanceApiWebSocketClientImpl implements BinanceApiWebSocketClient, Closeable {
+    private final List<Integer> ALLOWED_PARTIAL_DEPTH = Arrays.asList(5, 10, 20);
 
     private final OkHttpClient client;
 
@@ -28,11 +32,29 @@ public class BinanceApiWebSocketClientImpl implements BinanceApiWebSocketClient,
 
     @Override
     public Closeable onDepthEvent(String symbols, BinanceApiCallback<DepthEvent> callback) {
-        final String channel = Arrays.stream(symbols.split(","))
+        final String channel = Arrays.stream(symbols.toLowerCase().split(","))
                 .map(String::trim)
                 .map(s -> String.format("%s@depth", s))
                 .collect(Collectors.joining("/"));
         return createNewWebSocket(channel, new BinanceApiWebSocketListener<>(callback, DepthEvent.class));
+    }
+
+    @Override
+    public Closeable onPartialDepthEvent(String symbols, int depth, DepthStreamInterval interval, BinanceApiCallback<OrderBook> callback) {
+        if (!ALLOWED_PARTIAL_DEPTH.contains(depth)) {
+            throw new IllegalArgumentException(String.format("depth %s should be one of : [5, 10, 20]", depth));
+        }
+
+        Stream<String> stream = Arrays.stream(symbols.toLowerCase().split(","))
+                .map(String::trim)
+                .map(s -> String.format("%s@depth%d", s, depth));
+
+        if (interval == DepthStreamInterval.MILLIS_100) {
+            stream = stream.map(s -> s + "@100ms");
+        }
+
+        final String channel = stream.collect(Collectors.joining("/"));
+        return createNewWebSocket(channel, new BinanceApiWebSocketListener<>(callback, OrderBook.class));
     }
 
     @Override
