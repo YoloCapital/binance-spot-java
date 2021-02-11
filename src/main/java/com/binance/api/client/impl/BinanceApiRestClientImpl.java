@@ -3,6 +3,7 @@ package com.binance.api.client.impl;
 import com.binance.api.client.BinanceApiRestClient;
 import com.binance.api.client.config.BinanceApiConfig;
 import com.binance.api.client.constant.BinanceApiConstants;
+import com.binance.api.client.domain.UniversalTransferType;
 import com.binance.api.client.domain.account.*;
 import com.binance.api.client.domain.account.request.*;
 import com.binance.api.client.domain.general.Asset;
@@ -205,6 +206,11 @@ public class BinanceApiRestClientImpl implements BinanceApiRestClient {
   @Override
   public DepositAddress getDepositAddress(String asset) {
     return executeSync(binanceApiService.getDepositAddress(asset, BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis()));
+  }
+
+  @Override
+  public UniversalTransferResult universalTransfer(String asset, UniversalTransferType type, String amount) {
+    return executeSync(binanceApiService.universalTransfer(asset, amount, type.toString(), BinanceApiConstants.DEFAULT_RECEIVING_WINDOW, System.currentTimeMillis()));
   }
 
   // User stream endpoints
