@@ -77,6 +77,10 @@ public class SymbolFilter {
    */
   private String limit;
 
+  private String multiplierDown;
+  private String multiplierUp;
+  private String multiplierDecimal;
+
   public FilterType getFilterType() {
     return filterType;
   }
@@ -156,5 +160,29 @@ public class SymbolFilter {
 
   public void setLimit(String limit) {
     this.limit = limit;
+  }
+
+  public String getMultiplierDown() {
+    return multiplierDown;
+  }
+
+  public void setMultiplierDown(String multiplierDown) {
+    this.multiplierDown = multiplierDown;
+  }
+
+  public String getMultiplierUp() {
+    return multiplierUp;
+  }
+
+  public void setMultiplierUp(String multiplierUp) {
+    this.multiplierUp = multiplierUp;
+  }
+
+  public String getMultiplierDecimal() {
+    return multiplierDecimal;
+  }
+
+  public void setMultiplierDecimal(String multiplierDecimal) {
+    this.multiplierDecimal = multiplierDecimal;
   }
 }
